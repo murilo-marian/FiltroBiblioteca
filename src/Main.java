@@ -3,9 +3,15 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Filtro filtro = Filtro.getInstance("blackList.txt", "whiteList.txt", TipoDeFiltro.Asteriscos, false);
-        /*filtro.adicionarBlackList("caralho");*/
+        Filtro filtro = Filtro.getInstance("blackList.txt", TipoDeFiltro.Asteriscos, true);
+        /*filtro.adicionarBlackList("leet");*/
 
-        System.out.println(filtro.filtrar("chupa o meu caralho alado gigante"));
+        //TODO sistema de log
+        //TODO sistema de whitelist
+
+        filtro.atualizarBlacklist();
+        filtro.hasFileWhitelist("whitelist.txt").hasCaminhoLog("log.txt");
+
+        System.out.println(filtro.filtrar("1e33ee7"));
     }
 }

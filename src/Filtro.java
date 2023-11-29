@@ -7,20 +7,22 @@ import java.util.regex.Pattern;
 
 public class Filtro {
     private static Filtro filtro;
-    private File fileBlacklist;
-    private File fileWhitelist;
-    private String caminhoLog;
+    private File fileBlacklist = null;
+    private File fileWhitelist = null;
+    private File fileLog = null;
     private TipoDeFiltro tipoDeFiltro;
     private boolean autoLeetspeak;
     private List<String> blacklist;
     private List<String> whitelist;
+    private List<MensagemFiltrada> mensagemFiltradas;
 
-    private Filtro(String caminhoBlacklist, String caminhoWhitelist, TipoDeFiltro tipoDeFiltro, boolean autoLeetspeak) throws IOException {
+    private Filtro(String caminhoBlacklist, TipoDeFiltro tipoDeFiltro, boolean autoLeetspeak) throws IOException {
         this.fileBlacklist = new File(caminhoBlacklist);
-        this.fileWhitelist = new File(caminhoWhitelist);
         this.tipoDeFiltro = tipoDeFiltro;
         this.autoLeetspeak = autoLeetspeak;
-        this.atualizarBlacklist();
+
+        //T0D0 fazer não explodir o código se o arquivo não existe aqui
+        /*this.atualizarBlacklist();*/
         /*this.atualizarWhitelist();*/
     }
 
@@ -74,6 +76,13 @@ public class Filtro {
                 mensagem = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
             }
         }
+        if (fileLog != null) {
+            try {
+                adicionarLog(mensagem);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         return mensagem;
     }
@@ -85,13 +94,16 @@ public class Filtro {
 
         //iterar nas letras e trocar por regex
 
+        List<String> letrasNovas = new ArrayList<>();
         for (String letra : letras) {
-            /*letra = getRegex(letra);*/
+            letrasNovas.add(LeetSpeakRegex.getRegex(letra));
         }
 
         //remontar palavra
 
-        return palavra;
+        String palavraLeet = String.join( "", letrasNovas);
+
+        return palavraLeet;
     }
 
     public void adicionarBlackList(String palavra) throws IOException {
@@ -106,7 +118,7 @@ public class Filtro {
             palavra = System.getProperty( "line.separator") + palavra;
         }
 
-        FileWriter blackWriter = new FileWriter(fileBlacklist, true);
+        BufferedWriter blackWriter = new BufferedWriter(new FileWriter(fileBlacklist, true));
         blackWriter.write(palavra);
         blackWriter.close();
 
@@ -120,25 +132,97 @@ public class Filtro {
             palavra = System.getProperty( "line.separator") + palavra;
         }
 
-        FileWriter whiteWriter = new FileWriter(fileWhitelist, true);
+        BufferedWriter whiteWriter = new BufferedWriter(new FileWriter(fileWhitelist, true));
         whiteWriter.write(palavra);
         whiteWriter.close();
 
         atualizarWhitelist();
     }
 
+    //TODO mudar isso pra json ou algo assim
+    //TODO salvar como um objeto MensagemFiltrada
+    public void adicionarLog(String mensagem) throws IOException {
+        FileWriter logWriter = new FileWriter(fileWhitelist, true);
+        logWriter.write(mensagem);
+        logWriter.close();
+    }
+
+    //TODO puxar o log
     public String getLog() {
         return null;
     }
 
-    public void saveLog() {
 
-    }
-
-    public static Filtro getInstance(String caminhoBlacklist, String caminhoWhitelist, TipoDeFiltro tipoDeFiltro, boolean autoLeetspeak) throws IOException {
+    public static Filtro getInstance(String caminhoBlacklist, TipoDeFiltro tipoDeFiltro, boolean autoLeetspeak) throws IOException {
         if (filtro == null) {
-            filtro = new Filtro(caminhoBlacklist, caminhoWhitelist, tipoDeFiltro, autoLeetspeak);
+            filtro = new Filtro(caminhoBlacklist, tipoDeFiltro, autoLeetspeak);
         }
         return filtro;
+    }
+
+    public static Filtro getFiltro() {
+        return filtro;
+    }
+
+    public static void setFiltro(Filtro filtro) {
+        Filtro.filtro = filtro;
+    }
+
+    public File getFileBlacklist() {
+        return fileBlacklist;
+    }
+
+    public void setFileBlacklist(File fileBlacklist) {
+        this.fileBlacklist = fileBlacklist;
+    }
+
+    public File getFileWhitelist() {
+        return fileWhitelist;
+    }
+
+    public Filtro hasFileWhitelist(String fileWhitelist) {
+        this.fileWhitelist = new File(fileWhitelist);
+        return this;
+    }
+
+    public File getFileLog() {
+        return fileLog;
+    }
+
+    public Filtro hasCaminhoLog(String caminhoLog) {
+        this.fileLog = new File(caminhoLog);
+        return this;
+    }
+
+    public TipoDeFiltro getTipoDeFiltro() {
+        return tipoDeFiltro;
+    }
+
+    public void setTipoDeFiltro(TipoDeFiltro tipoDeFiltro) {
+        this.tipoDeFiltro = tipoDeFiltro;
+    }
+
+    public boolean isAutoLeetspeak() {
+        return autoLeetspeak;
+    }
+
+    public void setAutoLeetspeak(boolean autoLeetspeak) {
+        this.autoLeetspeak = autoLeetspeak;
+    }
+
+    public List<String> getBlacklist() {
+        return blacklist;
+    }
+
+    public void setBlacklist(List<String> blacklist) {
+        this.blacklist = blacklist;
+    }
+
+    public List<String> getWhitelist() {
+        return whitelist;
+    }
+
+    public void setWhitelist(List<String> whitelist) {
+        this.whitelist = whitelist;
     }
 }
