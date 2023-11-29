@@ -9,6 +9,9 @@ public class Main {
         //TODO sistema de log
         //TODO sistema de whitelist
 
+        //talvez vou mudar o sistema do leetSpeakRegex, um enum com cada letra do alfabeto separada não me parece muito eficiente
+        //Não sei se salvo as mensagens logadas como JSON ou outra coisa, mas JSON parece bom
+
         filtro.atualizarBlacklist();
         filtro.hasFileWhitelist("whitelist.txt").hasCaminhoLog("log.txt");
 
