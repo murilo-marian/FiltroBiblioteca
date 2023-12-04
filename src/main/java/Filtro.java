@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,6 +10,7 @@ public class Filtro {
     private static Filtro filtro;
     private File fileBlacklist = null;
     private File fileWhitelist = null;
+    private File fileBlacklistLeet = null;
     private File fileLog = null;
     private TipoDeFiltro tipoDeFiltro;
     private boolean autoLeetspeak;
@@ -18,10 +20,13 @@ public class Filtro {
 
     private Filtro(String caminhoBlacklist, TipoDeFiltro tipoDeFiltro, boolean autoLeetspeak) throws IOException {
         this.fileBlacklist = new File(caminhoBlacklist);
+        int posicaoExtensao = caminhoBlacklist.indexOf(".");
+        this.fileBlacklistLeet = new File(caminhoBlacklist.substring(0, posicaoExtensao) + "LeetSpeak" + caminhoBlacklist.substring(posicaoExtensao));
+        System.out.println(fileBlacklistLeet);
         this.tipoDeFiltro = tipoDeFiltro;
         this.autoLeetspeak = autoLeetspeak;
 
-        //T0D0 fazer não explodir o código se o arquivo não existe aqui
+        //T0D0 fazer não explodir o código se o arquivo não existe ou se a extensão tá errada aqui
         /*this.atualizarBlacklist();*/
         /*this.atualizarWhitelist();*/
     }
@@ -43,8 +48,12 @@ public class Filtro {
     }
 
     public void atualizarBlacklist() throws IOException {
-
-        BufferedReader blackReader = new BufferedReader(new FileReader(fileBlacklist));
+        BufferedReader blackReader;
+        if (autoLeetspeak) {
+            blackReader = new BufferedReader(new FileReader(fileBlacklistLeet));
+        } else {
+            blackReader = new BufferedReader(new FileReader(fileBlacklist));
+        }
 
         List<String> blacklist = new ArrayList<>();
 
@@ -60,9 +69,9 @@ public class Filtro {
         blackReader.close();
     }
 
-    public String filtrar(String mensagem) {
+    public String filtrar(String usuario, String mensagem, Date dataEnvio) {
         for (String s : blacklist) {
-            Pattern re = Pattern.compile(s,Pattern.CASE_INSENSITIVE);
+            Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
             Matcher m = re.matcher(mensagem);
             if (m.find()) {
                 System.out.println("match");
@@ -73,16 +82,18 @@ public class Filtro {
                     palavrao = groupMatcher.group(1);
                     System.out.println("palavrao = " + palavrao);
                 }
-                mensagem = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
+                String mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
+                if (fileLog != null) {
+                    try {
+                        adicionarLog(usuario, mensagem, mensagemCensurada, dataEnvio);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                return mensagemCensurada;
             }
         }
-        if (fileLog != null) {
-            try {
-                adicionarLog(mensagem);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+
 
         return mensagem;
     }
@@ -101,7 +112,7 @@ public class Filtro {
 
         //remontar palavra
 
-        String palavraLeet = String.join( "", letrasNovas);
+        String palavraLeet = String.join("", letrasNovas);
 
         return palavraLeet;
     }
@@ -115,12 +126,18 @@ public class Filtro {
         }
 
         if (fileBlacklist.length() > 0) {
-            palavra = System.getProperty( "line.separator") + palavra;
+            palavra = System.getProperty("line.separator") + palavra;
         }
 
         BufferedWriter blackWriter = new BufferedWriter(new FileWriter(fileBlacklist, true));
+        BufferedWriter blackWriterLeet = new BufferedWriter(new FileWriter(fileBlacklistLeet, true));
+
         blackWriter.write(palavra);
         blackWriter.close();
+
+        palavra = gerarLeetSpeak(palavra);
+        blackWriterLeet.write(palavra);
+        blackWriterLeet.close();
 
         atualizarBlacklist();
     }
@@ -129,7 +146,7 @@ public class Filtro {
         palavra = palavra.replace("\n", "");
 
         if (fileWhitelist.length() > 0) {
-            palavra = System.getProperty( "line.separator") + palavra;
+            palavra = System.getProperty("line.separator") + palavra;
         }
 
         BufferedWriter whiteWriter = new BufferedWriter(new FileWriter(fileWhitelist, true));
@@ -141,17 +158,14 @@ public class Filtro {
 
     //TODO mudar isso pra json ou algo assim
     //TODO salvar como um objeto MensagemFiltrada
-    public void adicionarLog(String mensagem) throws IOException {
+    public void adicionarLog(String usuario, String mensagem, String filtrada, Date dataEnvio) throws IOException {
         FileWriter logWriter = new FileWriter(fileWhitelist, true);
+
+        MensagemFiltrada mensagemFiltrada = new MensagemFiltrada(usuario, mensagem, filtrada, dataEnvio );
+
         logWriter.write(mensagem);
         logWriter.close();
     }
-
-    //TODO puxar o log
-    public String getLog() {
-        return null;
-    }
-
 
     public static Filtro getInstance(String caminhoBlacklist, TipoDeFiltro tipoDeFiltro, boolean autoLeetspeak) throws IOException {
         if (filtro == null) {

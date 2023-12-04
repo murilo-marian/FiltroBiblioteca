@@ -700,3 +700,4 @@ zé-ninguém
 zelota
 zero à esquerda
 [l172][e3&]+[e3&]+[t7]
+[c][a4@]+[r][a4@]+[l172][h#][o0]+
