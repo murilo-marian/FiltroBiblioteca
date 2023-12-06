@@ -1,24 +1,30 @@
 import java.util.Date;
 
+/**
+ * <h2>MensagemFiltrada - Classe que contém uma mensagem original e sua versão filtrada, opcionalmente, uma data de envio e um nome de usuário</h2>
+ * @author Murilo Mazzini Marian (murilomarian.mm@gmail.com)
+ * @version 1.0
+ *
+ * <p>Classe utilizada apenas para a função de log do sistema, salvando a mensagem original e a mensagem filtrada, e, de forma opcional, um nome de usuario e a data de envio</p>
+ */
 public class MensagemFiltrada {
-    public String nomeUsuario;
-    public String mensagemOriginal;
-    public String mensagemFiltrada;
-    public Date horarioDeEnvio;
+    private String nomeUsuario = null;
+    private String mensagemOriginal;
+    private String mensagemFiltrada;
+    private Date horarioDeEnvio = null;
 
-    public MensagemFiltrada(String nomeUsuario, String mensagemOriginal, String mensagemFiltrada, Date horarioDeEnvio) {
-        this.nomeUsuario = nomeUsuario;
+    public MensagemFiltrada(String mensagemOriginal, String mensagemFiltrada) {
         this.mensagemOriginal = mensagemOriginal;
         this.mensagemFiltrada = mensagemFiltrada;
-        this.horarioDeEnvio = horarioDeEnvio;
     }
 
     public String getNomeUsuario() {
         return nomeUsuario;
     }
 
-    public void setNomeUsuario(String nomeUsuario) {
+    public MensagemFiltrada hasNomeUsuario(String nomeUsuario) {
         this.nomeUsuario = nomeUsuario;
+        return this;
     }
 
     public String getMensagemOriginal() {
@@ -41,8 +47,9 @@ public class MensagemFiltrada {
         return horarioDeEnvio;
     }
 
-    public void setHorarioDeEnvio(Date horarioDeEnvio) {
+    public MensagemFiltrada hasHorarioDeEnvio(Date horarioDeEnvio) {
         this.horarioDeEnvio = horarioDeEnvio;
+        return this;
     }
 
     @Override
