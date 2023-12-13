@@ -111,19 +111,16 @@ public class Filtro {
             Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
             Matcher m = re.matcher(mensagem);
             if (m.find()) {
-                System.out.println("match");
                 Pattern pattern = Pattern.compile("(" + s + ")");
                 Matcher groupMatcher = pattern.matcher(mensagem);
                 String palavrao = "";
                 while (groupMatcher.find()) {
                     palavrao = groupMatcher.group(1);
-                    System.out.println("palavrao = " + palavrao);
                 }
                 /*if (fileWhitelist != null && inWhitelist()) {
                     return mensagem;
                 }*/
                 mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
-                System.out.println(mensagemCensurada);
                 matchFound = true;
             }
         }
@@ -153,19 +150,16 @@ public class Filtro {
             Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
             Matcher m = re.matcher(mensagem);
             if (m.find()) {
-                System.out.println("match");
                 Pattern pattern = Pattern.compile("(" + s + ")");
                 Matcher groupMatcher = pattern.matcher(mensagem);
                 String palavrao = "";
                 while (groupMatcher.find()) {
                     palavrao = groupMatcher.group(1);
-                    System.out.println("palavrao = " + palavrao);
                 }
                 /*if (fileWhitelist != null && inWhitelist()) {
                     return mensagem;
                 }*/
                 mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
-                System.out.println(mensagemCensurada);
                 matchFound = true;
             }
         }
@@ -194,19 +188,16 @@ public class Filtro {
             Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
             Matcher m = re.matcher(mensagem);
             if (m.find()) {
-                System.out.println("match");
                 Pattern pattern = Pattern.compile("(" + s + ")");
                 Matcher groupMatcher = pattern.matcher(mensagem);
                 String palavrao = "";
                 while (groupMatcher.find()) {
                     palavrao = groupMatcher.group(1);
-                    System.out.println("palavrao = " + palavrao);
                 }
                 /*if (fileWhitelist != null && inWhitelist()) {
                     return mensagem;
                 }*/
                 mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
-                System.out.println(mensagemCensurada);
                 matchFound = true;
             }
         }
@@ -236,19 +227,16 @@ public class Filtro {
             Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
             Matcher m = re.matcher(mensagem);
             if (m.find()) {
-                System.out.println("match");
                 Pattern pattern = Pattern.compile("(" + s + ")");
                 Matcher groupMatcher = pattern.matcher(mensagem);
                 String palavrao = "";
                 while (groupMatcher.find()) {
                     palavrao = groupMatcher.group(1);
-                    System.out.println("palavrao = " + palavrao);
                 }
                 /*if (fileWhitelist != null && inWhitelist()) {
                     return mensagem;
                 }*/
                 mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
-                System.out.println(mensagemCensurada);
                 matchFound = true;
             }
         }
