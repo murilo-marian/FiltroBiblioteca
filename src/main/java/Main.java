@@ -8,14 +8,10 @@ public class Main {
         Filtro filtro = Filtro.getInstance("blackList.txt", TipoDeFiltro.Asteriscos, true);
         /*filtro.adicionarBlackList("filho da puta");*/
 
-        //TODO adicionarBlacklist código meio ruim no LineSeparator
-        //TODO sistema de whitelist
-        //TODO JAVADOC
         //TODO ARTIGO
-        //TODO Deixar todos os overload de filtrar iguais
 
         filtro.atualizarBlacklist();
-        filtro.hasFileWhitelist("whitelist.txt").hasCaminhoLog("log.json");
+        filtro.hasCaminhoLog("log.json");
 
         System.out.println(filtro.filtrar("", "puta do caralho", Calendar.getInstance().getTime()));
     }

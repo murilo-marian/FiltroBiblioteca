@@ -1,3 +1,9 @@
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.*;
 import java.util.Date;
 
 /**
@@ -16,6 +22,44 @@ public class MensagemFiltrada {
     public MensagemFiltrada(String mensagemOriginal, String mensagemFiltrada) {
         this.mensagemOriginal = mensagemOriginal;
         this.mensagemFiltrada = mensagemFiltrada;
+    }
+
+    /**
+     * Adiciona um objeto MensagemFiltrada ao log.json, salvando a mensagem filtrada, a mensagem original, e, de forma opcional, um nome de usuário e uma data
+     * @param fileLog File - contém o arquivo onde a mensagem em questão será salva
+     * @throws IOException
+     */
+    public void adicionarLog(File fileLog) throws IOException {
+
+        JSONArray logJSON = new JSONArray();
+        if (fileLog.exists() && fileLog.length() != 0) {
+            JSONParser parser = new JSONParser();
+            try {
+                logJSON = (JSONArray) parser.parse(new FileReader(fileLog));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter(fileLog));
+
+        if (!fileLog.exists()) {
+            bw.write("");
+        }
+        JSONObject mensagemJSON = new JSONObject();
+        if (this.getNomeUsuario() != null) {
+            mensagemJSON.put("usuario", this.getNomeUsuario());
+        }
+        mensagemJSON.put("mensagem", this.getMensagemOriginal());
+        mensagemJSON.put("mensagem filtrada", this.getMensagemFiltrada());
+        if (this.getHorarioDeEnvio() != null) {
+            mensagemJSON.put("Data de envio", this.getHorarioDeEnvio().toString());
+        }
+
+        logJSON.add(mensagemJSON);
+
+        bw.write(logJSON.toJSONString());
+        bw.close();
     }
 
     public String getNomeUsuario() {

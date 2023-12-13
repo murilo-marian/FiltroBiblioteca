@@ -20,8 +20,8 @@ import java.util.regex.Pattern;
  */
 public class Filtro {
     private static Filtro filtro;
-    private File fileBlacklist;
-    private File fileWhitelist = null;
+    private File fileBlacklist;/*
+    private File fileWhitelist = null;*/
     private final File fileBlacklistLeet;
     private File fileLog = null;
     private TipoDeFiltro tipoDeFiltro;
@@ -54,12 +54,7 @@ public class Filtro {
     }
 
 
-    /**
-     * Método que atualiza o ArrayList contendo as palavras da whitelist, puxando do arquivo de whitelist.txt
-     *
-     * @throws IOException
-     */
-    public void atualizarWhitelist() throws IOException {
+    /*public void atualizarWhitelist() throws IOException {
         BufferedReader whiteReader = new BufferedReader(new FileReader(fileWhitelist));
         List<String> whitelist = new ArrayList<>();
 
@@ -73,7 +68,7 @@ public class Filtro {
         this.whitelist = whitelist;
 
         whiteReader.close();
-    }
+    }*/
 
     /**
      * Método que atualiza o ArrayList contendo as palavras da whitelist, puxando do arquivo de whitelist.txt
@@ -107,7 +102,7 @@ public class Filtro {
      * trocando a palavra detectada pelo caracter especificado no contrutor da classe
      *
      * @param mensagem String - mensagem a ser escaneada e eventualmente filtrada caso for detectada uma palavra proibida
-     * @return
+     * @return String - Retorna a mensagem após ela passar pelo processo de filtro
      */
     public String filtrar(String mensagem) {
         String mensagemCensurada = mensagem;
@@ -124,9 +119,9 @@ public class Filtro {
                     palavrao = groupMatcher.group(1);
                     System.out.println("palavrao = " + palavrao);
                 }
-                if (fileWhitelist != null && inWhitelist()) {
+                /*if (fileWhitelist != null && inWhitelist()) {
                     return mensagem;
-                }
+                }*/
                 mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
                 System.out.println(mensagemCensurada);
                 matchFound = true;
@@ -135,7 +130,7 @@ public class Filtro {
         if (fileLog != null && matchFound) {
             try {
                 MensagemFiltrada mensagemFiltrada = new MensagemFiltrada(mensagem, mensagemCensurada);
-                adicionarLog(mensagemFiltrada);
+                mensagemFiltrada.adicionarLog(fileLog);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -143,39 +138,17 @@ public class Filtro {
         return mensagemCensurada;
     }
 
+    /**
+     * Método principal do programa, modifica a String passada como parâmetro caso uma palavra que está na blacklist for detectada pelo regex,
+     * trocando a palavra detectada pelo caracter especificado no contrutor da classe
+     * @param usuario String - nome de usuário a ser atrelado a mensagem durante o processo de log de mensagem filtrada
+     * @param mensagem String - mensagem a ser escaneada e eventualmente filtrada caso for detectada uma palavra proibida
+     * @param dataEnvio Date - Data de envio a ser atrelada a mensagem durante o processo de log de mensagem filtrada
+     * @return String - Retorna a mensagem após ela passar pelo processo de filtro
+     */
     public String filtrar(String usuario, String mensagem, Date dataEnvio) {
         String mensagemCensurada = mensagem;
-        for (String s : blacklist) {
-            Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
-            Matcher m = re.matcher(mensagemCensurada);
-            if (m.find()) {
-                System.out.println("match");
-                Pattern pattern = Pattern.compile("(" + s + ")");
-                Matcher groupMatcher = pattern.matcher(mensagem);
-                String palavrao = "";
-                while (groupMatcher.find()) {
-                    palavrao = groupMatcher.group(1);
-                    System.out.println("palavrao = " + palavrao);
-                }
-                if (fileWhitelist != null && inWhitelist()) {
-                    continue;
-                }
-                mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
-                if (fileLog != null) {
-                    try {
-                        MensagemFiltrada mensagemFiltrada = new MensagemFiltrada(mensagem, mensagemCensurada).hasNomeUsuario(usuario).hasHorarioDeEnvio(dataEnvio);
-                        adicionarLog(mensagemFiltrada);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-        }
-        return mensagemCensurada;
-    }
-
-    public String filtrar(String mensagem, Date dataEnvio) {
-        String mensagemCensurada = mensagem;
+        boolean matchFound = false;
         for (String s : blacklist) {
             Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
             Matcher m = re.matcher(mensagem);
@@ -188,65 +161,115 @@ public class Filtro {
                     palavrao = groupMatcher.group(1);
                     System.out.println("palavrao = " + palavrao);
                 }
-                if (fileWhitelist != null && inWhitelist()) {
+                /*if (fileWhitelist != null && inWhitelist()) {
                     return mensagem;
-                }
+                }*/
                 mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
-                if (fileLog != null) {
-                    try {
-                        MensagemFiltrada mensagemFiltrada = new MensagemFiltrada(mensagem, mensagemCensurada).hasHorarioDeEnvio(dataEnvio);
-                        adicionarLog(mensagemFiltrada);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+                System.out.println(mensagemCensurada);
+                matchFound = true;
             }
         }
-        return mensagemCensurada;
-    }
-
-    public String filtrar(String usuario, String mensagem) {
-        String mensagemCensurada = mensagem;
-        for (String s : blacklist) {
-            Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
-            Matcher m = re.matcher(mensagem);
-            if (m.find()) {
-                System.out.println("match");
-                Pattern pattern = Pattern.compile("(" + s + ")");
-                Matcher groupMatcher = pattern.matcher(mensagem);
-                String palavrao = "";
-                while (groupMatcher.find()) {
-                    palavrao = groupMatcher.group(1);
-                    System.out.println("palavrao = " + palavrao);
-                }
-                if (fileWhitelist != null && inWhitelist()) {
-                        return mensagem;
-                }
-                mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
-                if (fileLog != null) {
-                    try {
-                        MensagemFiltrada mensagemFiltrada = new MensagemFiltrada(mensagem, mensagemCensurada).hasNomeUsuario(usuario);
-                        adicionarLog(mensagemFiltrada);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+        if (fileLog != null && matchFound) {
+            try {
+                MensagemFiltrada mensagemFiltrada = new MensagemFiltrada(mensagem, mensagemCensurada).hasNomeUsuario(usuario).hasHorarioDeEnvio(dataEnvio);
+                mensagemFiltrada.adicionarLog(fileLog);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
         return mensagemCensurada;
     }
 
     /**
-     * Método que detecta caso a palavra detectada faz parte de uma palavra maior que está na whitelist
-     *
-     * @return true caso for detectada a palavra, false caso o contrário
+     * Método principal do programa, modifica a String passada como parâmetro caso uma palavra que está na blacklist for detectada pelo regex,
+     * trocando a palavra detectada pelo caracter especificado no contrutor da classe
+     * @param mensagem String - mensagem a ser escaneada e eventualmente filtrada caso for detectada uma palavra proibida
+     * @param dataEnvio Date - Data de envio a ser atrelada a mensagem durante o processo de log de mensagem filtrada
+     * @return String - Retorna a mensagem após ela passar pelo processo de filtro
      */
-    private boolean inWhitelist() {
+    public String filtrar(String mensagem, Date dataEnvio) {
+        String mensagemCensurada = mensagem;
+        boolean matchFound = false;
+        for (String s : blacklist) {
+            Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
+            Matcher m = re.matcher(mensagem);
+            if (m.find()) {
+                System.out.println("match");
+                Pattern pattern = Pattern.compile("(" + s + ")");
+                Matcher groupMatcher = pattern.matcher(mensagem);
+                String palavrao = "";
+                while (groupMatcher.find()) {
+                    palavrao = groupMatcher.group(1);
+                    System.out.println("palavrao = " + palavrao);
+                }
+                /*if (fileWhitelist != null && inWhitelist()) {
+                    return mensagem;
+                }*/
+                mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
+                System.out.println(mensagemCensurada);
+                matchFound = true;
+            }
+        }
+        if (fileLog != null && matchFound) {
+            try {
+                MensagemFiltrada mensagemFiltrada = new MensagemFiltrada(mensagem, mensagemCensurada).hasHorarioDeEnvio(dataEnvio);
+                mensagemFiltrada.adicionarLog(fileLog);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return mensagemCensurada;
+    }
+
+
+    /**
+     * Método principal do programa, modifica a String passada como parâmetro caso uma palavra que está na blacklist for detectada pelo regex,
+     * trocando a palavra detectada pelo caracter especificado no contrutor da classe
+     * @param usuario String - nome de usuário a ser atrelado a mensagem durante o processo de log de mensagem filtrada
+     * @param mensagem String - mensagem a ser escaneada e eventualmente filtrada caso for detectada uma palavra proibida
+     * @return String - Retorna a mensagem após ela passar pelo processo de filtro
+     */
+    public String filtrar(String usuario, String mensagem) {
+        String mensagemCensurada = mensagem;
+        boolean matchFound = false;
+        for (String s : blacklist) {
+            Pattern re = Pattern.compile(s, Pattern.CASE_INSENSITIVE);
+            Matcher m = re.matcher(mensagem);
+            if (m.find()) {
+                System.out.println("match");
+                Pattern pattern = Pattern.compile("(" + s + ")");
+                Matcher groupMatcher = pattern.matcher(mensagem);
+                String palavrao = "";
+                while (groupMatcher.find()) {
+                    palavrao = groupMatcher.group(1);
+                    System.out.println("palavrao = " + palavrao);
+                }
+                /*if (fileWhitelist != null && inWhitelist()) {
+                    return mensagem;
+                }*/
+                mensagemCensurada = m.replaceAll(tipoDeFiltro.getCharacter().repeat(palavrao.length()));
+                System.out.println(mensagemCensurada);
+                matchFound = true;
+            }
+        }
+        if (fileLog != null && matchFound) {
+            try {
+                MensagemFiltrada mensagemFiltrada = new MensagemFiltrada(mensagem, mensagemCensurada).hasNomeUsuario(usuario);
+                mensagemFiltrada.adicionarLog(fileLog);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return mensagemCensurada;
+    }
+
+
+    /*private boolean inWhitelist() {
         for (String s : whitelist) {
 
         }
         return false;
-    }
+    }*/
 
     /**
      * Transforma a palavra numa versão composta por regex dela mesma, sendo o regex atribuido pela lista no enum LeetSpeakRegex
@@ -254,9 +277,9 @@ public class Filtro {
      * @param palavra String - palavra a ser transformada
      * @return String Retorna a palavra modificada
      */
-    public String gerarLeetSpeak(String palavra) {
+    private String gerarLeetSpeak(String palavra) {
 
-        List<String> letras = new ArrayList<>();
+        List<String> letras;
         letras = Arrays.asList(palavra.split(""));
 
         //iterar nas letras e trocar por regex
@@ -268,9 +291,7 @@ public class Filtro {
 
         //remontar palavra
 
-        String palavraLeet = String.join("", letrasNovas);
-
-        return palavraLeet;
+        return String.join("", letrasNovas);
     }
 
     /**
@@ -304,12 +325,7 @@ public class Filtro {
         atualizarBlacklist();
     }
 
-    /**
-     * Adiciona a palavra ou frase permitida no arquivo whitelist.txt
-     * @param palavra String - palavra a ser adicionada
-     * @throws IOException
-     */
-    public void adicionarWhiteList(String palavra) throws IOException {
+    /*public void adicionarWhiteList(String palavra) throws IOException {
         palavra = palavra.replace("\n", "");
 
         if (fileWhitelist.length() > 0) {
@@ -321,45 +337,7 @@ public class Filtro {
         whiteWriter.close();
 
         atualizarWhitelist();
-    }
-
-    /**
-     * Adiciona um objeto MensagemFiltrada ao log.json, salvando a mensagem filtrada, a mensagem original, e, de forma opcional, um nome de usuário e uma data
-     * @param mensagemFiltrada MensagemFiltrada - contém as informações necessárias para adicionar ao log
-     * @throws IOException
-     */
-    public void adicionarLog(MensagemFiltrada mensagemFiltrada) throws IOException {
-
-        JSONArray logJSON = new JSONArray();
-        if (fileLog.exists() && fileLog.length() != 0) {
-            JSONParser parser = new JSONParser();
-            try {
-                logJSON = (JSONArray) parser.parse(new FileReader(fileLog));
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        BufferedWriter bw = new BufferedWriter(new FileWriter(fileLog));
-
-        if (!fileLog.exists()) {
-            bw.write("");
-        }
-        JSONObject mensagemJSON = new JSONObject();
-        if (mensagemFiltrada.getNomeUsuario() != null) {
-            mensagemJSON.put("usuario", mensagemFiltrada.getNomeUsuario());
-        }
-        mensagemJSON.put("mensagem", mensagemFiltrada.getMensagemOriginal());
-        mensagemJSON.put("mensagem filtrada", mensagemFiltrada.getMensagemFiltrada());
-        if (mensagemFiltrada.getHorarioDeEnvio() != null) {
-            mensagemJSON.put("Data de envio", mensagemFiltrada.getHorarioDeEnvio().toString());
-        }
-
-        logJSON.add(mensagemJSON);
-
-        bw.write(logJSON.toJSONString());
-        bw.close();
-    }
+    }*/
 
     public static Filtro getInstance(String caminhoBlacklist, TipoDeFiltro tipoDeFiltro, boolean autoLeetspeak) throws IOException {
         if (filtro == null) {
@@ -384,7 +362,7 @@ public class Filtro {
         this.fileBlacklist = fileBlacklist;
     }
 
-    public File getFileWhitelist() {
+    /*public File getFileWhitelist() {
         return fileWhitelist;
     }
 
@@ -405,7 +383,7 @@ public class Filtro {
             throw new RuntimeException(e);
         }
         return this;
-    }
+    }*/
 
     public File getFileLog() {
         return fileLog;
